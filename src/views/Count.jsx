@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { DENOMS, yen, signed, fmtAt, today, withRunning, lastBal } from "../lib";
+import { DENOMS, yen, signed, fmtAt, today, withRunning, lastBal, bookAt, num } from "../lib";
 import { addRow, removeRow } from "../useData";
 import { Seal, TwoStep, errMsg } from "../ui";
 
@@ -23,7 +23,10 @@ export default function Count({ data, toast }) {
   const actual = coins + boxes + pettyV;
   const any = DENOMS.some((d) => c[d] !== "") || BOXES.some((b) => box[b] !== "") || petty !== "";
   const diff = actual - book;
-  const hist = useMemo(() => [...counts].sort((a, b) => (b.at || 0) - (a.at || 0)), [counts]);
+  const hist = useMemo(() => [...counts].sort((a, b) => (b.at || 0) - (a.at || 0)).map((h) => {
+    const b = bookAt(txns, sales, settings.opening, h.at);
+    return { ...h, book: b, diff: num(h.actual) - b };
+  }), [counts, txns, sales, settings.opening]);
 
   const reset = () => { setC(blank()); setBox(blankBox()); setPetty(""); };
 
