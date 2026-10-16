@@ -25,6 +25,9 @@ export default function Home({ data, toast }) {
 
   return (
     <section>
+      <div className="row" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
+        <button className="small" onClick={() => window.location.reload()}>最新の状態に更新</button>
+      </div>
       <div className="panel hero">
         <div>
           <div className="lbl">帳簿上の現金在高</div>
