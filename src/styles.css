@@ -91,3 +91,24 @@ details summary{cursor:pointer;color:var(--muted);font-size:14px}
 .login h1{font-size:22px;font-weight:900;margin:0 0 16px}
 .err{color:var(--out);font-size:13px;margin:8px 0 0}
 .by{font-size:11px;color:var(--muted)}
+/* 区分の色分け */
+.tag.cat-0{background:#DDF0E4;color:#1F6B43}
+.tag.cat-1{background:#F7E9C8;color:#8A5A00}
+.tag.cat-2{background:#DCE8F5;color:#1F4F82}
+.tag.cat-3{background:#D6F0EF;color:#0F6466}
+.tag.cat-4{background:#E8E0F5;color:#5B3E8C}
+.tag.cat-5{background:#F7DDEA;color:#9C2F68}
+.tag.cat-6{background:#F8E0DA;color:#A2361F}
+.tag.cat-7{background:#EDE3D8;color:#6B4A2B}
+.tag.cat-8{background:#DDE2DF;color:#3D4A45}
+@media (prefers-color-scheme:dark){
+  .tag.cat-0{background:#1E3A2B;color:#8FD6AE}
+  .tag.cat-1{background:#3D311A;color:#F0C46A}
+  .tag.cat-2{background:#1E2F44;color:#9CC4EE}
+  .tag.cat-3{background:#173B3B;color:#84D4D2}
+  .tag.cat-4{background:#2E2440;color:#C3AEEA}
+  .tag.cat-5{background:#40202F;color:#F0A5CB}
+  .tag.cat-6{background:#42231C;color:#F2A18F}
+  .tag.cat-7{background:#352A20;color:#D7B999}
+  .tag.cat-8{background:#2C3532;color:#C9D3CE}
+}
