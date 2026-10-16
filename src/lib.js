@@ -41,3 +41,11 @@ export function changeLoans(txns) {
     .forEach((t) => { m[t.store] = (m[t.store] || 0) + (t.dir === "out" ? num(t.amount) : -num(t.amount)); });
   return m;
 }
+
+// 金庫チェックした時点の帳簿残高を、今の記録から計算し直す
+// （チェック後に記録を削除・修正しても差異に反映される）
+export function bookAt(txns, sales, opening, at) {
+  return allMoves(txns, sales)
+    .filter((t) => (t.createdAt || 0) <= at)
+    .reduce((b, t) => b + (t.dir === "in" ? num(t.amount) : -num(t.amount)), num(opening));
+}
