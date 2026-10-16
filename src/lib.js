@@ -1,7 +1,7 @@
 export const STORES = ["本部", "BERO BERO BAR", "BAR MASH", "Lounge Bee"];
 export const SHOPS = STORES.slice(1);
 export const CATS = [
-  { k: "両替金", dir: "out" }, { k: "銀行入金", dir: "out" }, { k: "銀行出金", dir: "in" },
+  { k: "売上金", dir: "in" }, { k: "両替金", dir: "out" }, { k: "銀行入金", dir: "out" }, { k: "銀行出金", dir: "in" },
   { k: "小口", dir: "out" }, { k: "女の子給与", dir: "out" }, { k: "社員給与", dir: "out" },
   { k: "立替金", dir: "out" }, { k: "現金過不足", dir: "in" }, { k: "その他", dir: "out" },
 ];
