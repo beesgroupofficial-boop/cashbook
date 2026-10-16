@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { SHOPS, yen, signed, num, thisMonth, fmtAt, allMoves, withRunning, lastBal, bookAt } from "../lib";
+import { SHOPS, yen, signed, num, thisMonth, fmtAt, allMoves, withRunning, lastBal } from "../lib";
 import { saveSettings } from "../useData";
 import { Seal, errMsg } from "../ui";
 
@@ -12,7 +12,8 @@ export default function Home({ data, toast }) {
   const run = useMemo(() => withRunning(txns, sales, settings.opening), [txns, sales, settings.opening]);
   const bal = lastBal(run, settings.opening);
   const lastRaw = useMemo(() => [...counts].sort((a, b) => (b.at || 0) - (a.at || 0))[0], [counts]);
-  const last = lastRaw ? { ...lastRaw, diff: num(lastRaw.actual) - bookAt(txns, sales, settings.opening, lastRaw.at) } : null;
+  // 最後に数えた金庫の金額と、今の帳簿上の現金在高の差
+  const last = lastRaw ? { ...lastRaw, diff: num(lastRaw.actual) - bal } : null;
 
   const tx = allMoves(txns, sales).filter((t) => (t.date || "").startsWith(mo));
   const inn = tx.filter((t) => t.dir === "in").reduce((a, t) => a + num(t.amount), 0);
@@ -39,7 +40,7 @@ export default function Home({ data, toast }) {
             <>
               <div className="big num">{yen(last.actual)}</div>
               <div className="num" style={{ marginTop: 4, fontWeight: 700, color: last.diff === 0 ? "var(--ok)" : "var(--out)" }}>
-                {last.diff === 0 ? "帳簿と一致" : `チェック時の差異 ${signed(last.diff)}`}
+                {last.diff === 0 ? "帳簿と一致" : `帳簿との差異 ${signed(last.diff)}`}
               </div>
             </>
           ) : (
