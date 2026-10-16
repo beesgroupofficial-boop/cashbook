@@ -19,11 +19,9 @@ export const fmtAt = (at) => { if (!at) return ""; const d = new Date(at); retur
 // 売上は「入力した日」に金庫へ入金されたものとして扱う
 export const inDate = (s) => (s.createdAt ? localDate(s.createdAt) : s.date || "");
 
-export function allMoves(txns, sales) {
-  return txns.concat(sales.map((s) => ({
-    id: "s_" + s.id, date: inDate(s), cat: "売上金", store: s.store, dir: "in",
-    amount: num(s.amount), memo: s.memo || "", createdAt: s.createdAt || 0, sale: true,
-  })));
+// 売上タブの売上は集計表示のみで、帳簿（現金在高）には反映しない
+export function allMoves(txns, _sales) {
+  return txns;
 }
 
 export function withRunning(txns, sales, opening) {
