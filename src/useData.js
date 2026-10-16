@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { collection, doc, onSnapshot, addDoc, deleteDoc, setDoc } from "firebase/firestore";
+import { collection, doc, onSnapshot, addDoc, deleteDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db, auth } from "./firebase";
 
 export function useData(enabled) {
@@ -19,5 +19,7 @@ export function useData(enabled) {
 
 const by = () => auth.currentUser?.email || "";
 export const addRow = (col, obj) => addDoc(collection(db, col), { ...obj, createdAt: obj.createdAt || Date.now(), by: by() });
+// 編集時は元の入力日時・入力者を残し、更新日時・更新者を追記する
+export const updateRow = (col, id, obj) => updateDoc(doc(db, col, id), { ...obj, updatedAt: Date.now(), updatedBy: by() });
 export const removeRow = (col, id) => deleteDoc(doc(db, col, id));
 export const saveSettings = (obj) => setDoc(doc(db, "settings", "main"), obj, { merge: true });
