@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { SHOPS, yen, signed, num, thisMonth, fmtAt, allMoves, withRunning, lastBal } from "../lib";
+import { SHOPS, yen, signed, num, thisMonth, fmtAt, allMoves, withRunning, lastBal, bookAt } from "../lib";
 import { saveSettings } from "../useData";
 import { Seal, errMsg } from "../ui";
 
@@ -11,7 +11,8 @@ export default function Home({ data, toast }) {
 
   const run = useMemo(() => withRunning(txns, sales, settings.opening), [txns, sales, settings.opening]);
   const bal = lastBal(run, settings.opening);
-  const last = useMemo(() => [...counts].sort((a, b) => (b.at || 0) - (a.at || 0))[0], [counts]);
+  const lastRaw = useMemo(() => [...counts].sort((a, b) => (b.at || 0) - (a.at || 0))[0], [counts]);
+  const last = lastRaw ? { ...lastRaw, diff: num(lastRaw.actual) - bookAt(txns, sales, settings.opening, lastRaw.at) } : null;
 
   const tx = allMoves(txns, sales).filter((t) => (t.date || "").startsWith(mo));
   const inn = tx.filter((t) => t.dir === "in").reduce((a, t) => a + num(t.amount), 0);
