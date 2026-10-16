@@ -5,6 +5,8 @@ export const CATS = [
   { k: "小口", dir: "out" }, { k: "女の子給与", dir: "out" }, { k: "社員給与", dir: "out" },
   { k: "立替金", dir: "out" }, { k: "現金過不足", dir: "in" }, { k: "その他", dir: "out" },
 ];
+// 区分ごとの色（styles.css の .cat-番号 と対応。「その他」は色なし）
+export const catClass = (cat) => { const i = CATS.findIndex((c) => c.k === cat); return i >= 0 && i < 9 ? `cat-${i}` : ""; };
 export const DENOMS = [10000, 5000, 2000, 1000, 500, 100, 50, 10, 5, 1];
 
 export const num = (v) => Number(v) || 0;
