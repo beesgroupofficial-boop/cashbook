@@ -36,7 +36,7 @@ export default function Sales({ data, toast }) {
           <label className="f" style={{ flex: "2 1 200px" }}>メモ<input placeholder="例：10/1〜10/3" value={f.memo} onChange={(e) => set("memo", e.target.value)} /></label>
         </div>
         <div className="row" style={{ marginTop: 12, justifyContent: "space-between" }}>
-          <span className="hint">保存した売上は、入力した日の入金として現金在高に自動で加算されます。</span>
+          <span className="hint">売上は集計用です。現金在高には反映されません。</span>
           <button className="primary" onClick={save} disabled={busy}>売上を保存</button>
         </div>
       </div>
@@ -75,7 +75,7 @@ export default function Sales({ data, toast }) {
           {rows.length ? rows.map((r) => (
             <tr key={r.id}><td className="num">{md(r.date)}</td><td>{r.store}</td>
               <td className="r num in-t">{yen(num(r.amount))}</td>
-              <td className="memo">{r.memo}{r.by && <div className="by">{r.by}</div>}</td>
+              <td className="memo">{r.memo}</td>
               <td><TwoStep aria-label="この売上を削除" onConfirm={() => removeRow("sales", r.id).catch((e) => toast(errMsg(e)))} /></td></tr>
           )) : <tr><td colSpan="5" className="empty">この月の売上はまだ入っていません。上のフォームから店舗ごとの合計を入れてください。</td></tr>}
         </tbody>
