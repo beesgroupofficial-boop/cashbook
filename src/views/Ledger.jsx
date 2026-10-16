@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { STORES, CATS, yen, md, today, thisMonth, withRunning, lastBal } from "../lib";
+import { STORES, CATS, catClass, yen, md, today, thisMonth, withRunning, lastBal } from "../lib";
 import { addRow, updateRow, removeRow } from "../useData";
 import { TwoStep, errMsg } from "../ui";
 
@@ -99,7 +99,7 @@ export default function Ledger({ data, toast }) {
         <tbody>
           {rows.length ? rows.map((t) => (
             <tr key={t.id} style={t.id === editId ? { background: "var(--sunk)" } : undefined}>
-              <td className="num">{md(t.date)}</td><td><span className="tag">{t.cat}</span></td><td>{t.store}</td>
+              <td className="num">{md(t.date)}</td><td><span className={"tag " + catClass(t.cat)}>{t.cat}</span></td><td>{t.store}</td>
               <td className="r num out-t">{t.dir === "out" ? yen(t.amount) : ""}</td>
               <td className="r num in-t">{t.dir === "in" ? yen(t.amount) : ""}</td>
               <td className="r num">{yen(t.bal)}</td>
