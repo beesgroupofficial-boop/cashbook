@@ -1,0 +1,12 @@
+{
+  "name": "現金出納帳 Bee's",
+  "short_name": "出納帳",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EEF0EC",
+  "theme_color": "#1D2A26",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
