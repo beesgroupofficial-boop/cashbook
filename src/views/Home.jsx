@@ -29,7 +29,18 @@ export default function Home({ data, toast }) {
         <div>
           <div className="lbl">帳簿上の現金在高</div>
           <div className="big num">{yen(bal)}</div>
-          <div className="lbl">{last ? `最終チェック ${fmtAt(last.at)}（実際 ${yen(last.actual)}）` : "金庫チェックはまだありません"}</div>
+          <div style={{ borderTop: "1px solid var(--line)", margin: "14px 0 12px" }} />
+          <div className="lbl">実際の金庫{last ? `（${fmtAt(last.at)} チェック）` : ""}</div>
+          {last ? (
+            <>
+              <div className="big num">{yen(last.actual)}</div>
+              <div className="num" style={{ marginTop: 4, fontWeight: 700, color: last.diff === 0 ? "var(--ok)" : "var(--out)" }}>
+                {last.diff === 0 ? "帳簿と一致" : `チェック時の差異 ${signed(last.diff)}`}
+              </div>
+            </>
+          ) : (
+            <div className="hint" style={{ marginTop: 4 }}>金庫チェックはまだありません</div>
+          )}
         </div>
         <Seal diff={last ? last.diff : null} />
       </div>
