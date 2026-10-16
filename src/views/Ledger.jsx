@@ -80,7 +80,7 @@ export default function Ledger({ data, toast }) {
               <td className="r num out-t">{t.dir === "out" ? yen(t.amount) : ""}</td>
               <td className="r num in-t">{t.dir === "in" ? yen(t.amount) : ""}</td>
               <td className="r num">{yen(t.bal)}</td>
-              <td className="memo">{t.memo}{t.by && <div className="by">{t.by}</div>}</td>
+              <td className="memo">{t.memo}</td>
               <td><TwoStep aria-label="この記録を削除" onConfirm={() => removeRow("txns", t.id).catch((e) => toast(errMsg(e)))} /></td>
             </tr>
           )) : <tr><td colSpan="8" className="empty">この月の記録はまだありません。上のフォームから最初の入出金を記録してください。</td></tr>}
