@@ -1,0 +1,93 @@
+:root{
+  --bg:#EEF0EC; --surface:#FFFFFF; --sunk:#E3E6E0; --ink:#1D2A26; --muted:#5E6B66; --line:#CBD1CB;
+  --in:#24577F; --out:#B83A24; --seal:#C8402A; --ok:#2E6B4F;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121815; --surface:#1B2320; --sunk:#232D29; --ink:#E6ECE8; --muted:#97A39E; --line:#33403B;
+    --in:#7DB3DD; --out:#F08A72; --seal:#F07258; --ok:#7CC49F; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121815; --surface:#1B2320; --sunk:#232D29; --ink:#E6ECE8; --muted:#97A39E; --line:#33403B;
+  --in:#7DB3DD; --out:#F08A72; --seal:#F07258; --ok:#7CC49F; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;font-size:15px;line-height:1.6;font-feature-settings:"tnum"}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:760px;margin:0 auto;padding:16px 16px 96px}
+header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:8px 0 16px}
+header.top h1{margin:0;font-size:20px;font-weight:900;letter-spacing:.04em}
+.mode{font-size:12px;color:var(--muted)}
+h2{font-size:17px;font-weight:700;margin:28px 0 10px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);flex:1 1 140px;min-width:0}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;width:100%}
+input:focus-visible,select:focus-visible,button:focus-visible,textarea:focus-visible{outline:2px solid var(--in);outline-offset:1px}
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 14px}
+button.primary{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
+button.ghost{background:transparent}
+button.small{padding:4px 9px;font-size:13px}
+button.danger{background:var(--out);color:#fff;border-color:var(--out)}
+.seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;border-radius:0;flex:1}
+.seg button[aria-pressed="true"].in{background:var(--in);color:#fff}
+.seg button[aria-pressed="true"].out{background:var(--out);color:#fff}
+.in-t{color:var(--in)} .out-t{color:var(--out)}
+/* balance hero */
+.hero{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}
+.hero .lbl{font-size:13px;color:var(--muted)}
+.hero .big{font-size:clamp(32px,9vw,46px);font-weight:900;line-height:1.1;letter-spacing:-.01em}
+.seal{width:92px;height:92px;border-radius:50%;border:3px solid var(--seal);color:var(--seal);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-8deg);text-align:center;line-height:1.15;flex:none}
+.seal b{font-size:22px;font-weight:900;letter-spacing:.1em}
+.seal small{font-size:11px}
+.seal.ok{border-color:var(--ok);color:var(--ok)}
+.seal.none{border-color:var(--line);color:var(--muted);border-style:dashed}
+.seal.pop{animation:stamp .35s ease-out}
+@keyframes stamp{0%{transform:rotate(-8deg) scale(1.6);opacity:0}70%{transform:rotate(-8deg) scale(.94);opacity:1}100%{transform:rotate(-8deg) scale(1)}}
+@media (prefers-reduced-motion:reduce){.seal.pop{animation:none}}
+.kv{display:grid;grid-template-columns:1fr auto;gap:6px 12px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;text-align:right;font-weight:500}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.split{grid-template-columns:1fr}}
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font-weight:500;color:var(--muted);background:var(--sunk);font-size:12px;position:sticky;top:0}
+td.r,th.r{text-align:right}
+tr:last-child td{border-bottom:0}
+td.memo{white-space:normal;min-width:120px;color:var(--muted)}
+.tag{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;background:var(--sunk)}
+tfoot td{font-weight:700;background:var(--sunk)}
+/* count tray */
+.tray{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media (max-width:480px){.tray{grid-template-columns:1fr}}
+.slot{display:grid;grid-template-columns:76px 1fr 92px;align-items:center;gap:8px;background:var(--bg);border-radius:8px;padding:6px 8px}
+.slot .d{font-weight:700}
+.slot .d.bill{color:var(--in)}
+.slot input{text-align:right;padding:7px 8px}
+.slot .sub{text-align:right;color:var(--muted);font-size:13px}
+.diffbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:14px;flex-wrap:wrap}
+.empty{color:var(--muted);padding:18px;text-align:center}
+/* tabs */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav.tabs .inner{display:flex;max-width:760px;width:100%}
+nav.tabs button{flex:1;border:0;border-radius:0;background:transparent;padding:12px 4px;font-size:13px;color:var(--muted);border-top:3px solid transparent}
+nav.tabs button[aria-current="page"]{color:var(--ink);font-weight:700;border-top-color:var(--seal)}
+.toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9;max-width:90vw}
+.toast.show{opacity:1}
+.hint{font-size:13px;color:var(--muted);margin:6px 0 0}
+details summary{cursor:pointer;color:var(--muted);font-size:14px}
+[hidden]{display:none!important}
+
+.who{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.login{max-width:380px;margin:12vh auto 0}
+.login h1{font-size:22px;font-weight:900;margin:0 0 16px}
+.err{color:var(--out);font-size:13px;margin:8px 0 0}
+.by{font-size:11px;color:var(--muted)}
