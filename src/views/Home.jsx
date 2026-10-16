@@ -49,3 +49,28 @@ export default function Home({ data, toast }) {
         <div className="panel"><dl className="kv num">
           {Object.keys(byCat).length
             ? Object.entries(byCat).map(([k, v]) => <Row key={k} k={k} v={signed(v)} cls={v < 0 ? "out-t" : "in-t"} />)
+            : <Row k="区分ごとの内訳" v="記録なし" />}
+        </dl></div>
+      </div>
+      <div className="panel" style={{ marginTop: 12 }}><dl className="kv num">
+        <dt style={{ gridColumn: "1/-1", color: "var(--ink)", fontWeight: 700 }}>店舗別の売上</dt>
+        {SHOPS.map((s, i) => <Row key={s} k={s} v={yen(shop[i])} cls="in-t" />)}
+        <Row k={<strong>合計</strong>} v={<strong>{yen(shop.reduce((a, b) => a + b, 0))}</strong>} />
+      </dl></div>
+
+      <h2>設定</h2>
+      <div className="panel">
+        <div className="row">
+          <label className="f">開始時点の現金在高（繰越金）
+            <input type="number" inputMode="numeric" value={opening} onChange={(e) => setOpening(e.target.value)} /></label>
+          <button onClick={async () => {
+            try { await saveSettings({ opening: parseInt(opening) || 0 }); toast("繰越金を保存しました"); } catch (e) { toast(errMsg(e)); }
+          }}>繰越金を保存</button>
+        </div>
+        <p className="hint">スプレッドシートの最終行の現金在高を入れると、そこから続きを記録できます。</p>
+      </div>
+    </section>
+  );
+}
+
+function Row({ k, v, cls = "" }) { return <><dt>{k}</dt><dd className={cls}>{v}</dd></>; }
