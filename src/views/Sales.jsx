@@ -15,7 +15,7 @@ export default function Sales({ data, toast }) {
     if (!f.date) { toast("売上日を入力してください"); return; }
     if (!amount || amount <= 0) { toast("売上合計を入力してください"); return; }
     setBusy(true);
-    try { await addRow("sales", { date: f.date, store: f.store, amount, memo: f.memo.trim() }); setF((s) => ({ ...s, amount: "", memo: "" })); toast("売上を保存しました"); }
+    try { await addRow("sales", { date: f.date, store: f.store, amount, memo: f.memo.trim() }); setF((s) => ({ ...s, amount: "", memo: "" })); const m = f.date.slice(0, 7); if (m !== mo) setMo(m); toast(m !== thisMonth() ? "売上を保存しました（" + Number(m.slice(5)) + "月の一覧に表示しています）" : "売上を保存しました"); }
     catch (e) { toast(errMsg(e)); } finally { setBusy(false); }
   };
 

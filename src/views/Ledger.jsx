@@ -38,7 +38,11 @@ export default function Ledger({ data, toast }) {
     setBusy(true);
     try {
       if (editId) { await updateRow("txns", editId, body); cancelEdit(); toast("変更を保存しました"); }
-      else { await addRow("txns", body); setF((s) => ({ ...s, amount: "", memo: "" })); toast("記録しました"); }
+      else { await addRow("txns", body); setF((s) => ({ ...s, amount: "", memo: "" }));
+      const m = f.date.slice(0, 7);
+      if (mo && m !== mo) setMo(m);
+      if (filter && filter !== f.cat) setFilter("");
+      toast(m !== thisMonth() ? "記録しました（" + Number(m.slice(5)) + "月の一覧に表示しています）" : "記録しました"); }
     } catch (e) { toast(errMsg(e)); } finally { setBusy(false); }
   };
 
