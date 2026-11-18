@@ -118,3 +118,5 @@ details summary{cursor:pointer;color:var(--muted);font-size:14px}
 .selstore{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;font-size:13px;color:var(--muted)}
 .selstore b{color:var(--ink)}
 tbody tr{cursor:default}
+td button.small{padding:2px 7px;font-size:12px}
+td .tag{padding:0 7px;font-size:11px}
