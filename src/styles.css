@@ -19,7 +19,7 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;font-size:15px;line-height:1.6;font-feature-settings:"tnum"}
 .num{font-variant-numeric:tabular-nums}
-.wrap{max-width:760px;margin:0 auto;padding:16px 16px 96px}
+.wrap{max-width:1100px;margin:0 auto;padding:16px 16px 96px}
 header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:8px 0 16px}
 header.top h1{margin:0;font-size:20px;font-weight:900;letter-spacing:.04em}
 .mode{font-size:12px;color:var(--muted)}
@@ -113,7 +113,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:14px}
   .tag.cat-8{background:#2C3532;color:#C9D3CE}
 }
 
-.selbar{position:fixed;left:0;right:0;bottom:calc(52px + env(safe-area-inset-bottom,0px));z-index:6;background:var(--surface);border-top:2px solid var(--seal);box-shadow:0 -4px 12px rgba(0,0,0,.12);padding:8px 14px;max-width:760px;margin:0 auto}
+.selbar{position:fixed;left:0;right:0;bottom:calc(52px + env(safe-area-inset-bottom,0px));z-index:6;background:var(--surface);border-top:2px solid var(--seal);box-shadow:0 -4px 12px rgba(0,0,0,.12);padding:8px 14px;max-width:1100px;margin:0 auto}
 .selsum{display:flex;gap:14px;flex-wrap:wrap;margin-top:4px;font-size:15px}
 .selstore{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;font-size:13px;color:var(--muted)}
 .selstore b{color:var(--ink)}
