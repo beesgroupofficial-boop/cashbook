@@ -122,7 +122,7 @@ export default function Ledger({ data, toast }) {
               <td className="r num in-t">{t.dir === "in" ? yen(t.amount) : ""}</td>
               <td className="r num">{yen(t.bal)}</td>
               <td className="memo">{t.memo}</td>
-              <td style={{ display: "flex", gap: 4 }}>
+              <td className="act">
                 <button className="small ghost" onClick={() => startEdit(t)} aria-label="この記録を編集">編集</button>
                 <TwoStep aria-label="この記録を削除" onConfirm={() => removeRow("txns", t.id).then(() => { if (t.id === editId) cancelEdit(); }).catch((e) => toast(errMsg(e)))} />
               </td>
