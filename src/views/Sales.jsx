@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { SHOPS, yen, md, num, today, thisMonth, inDate } from "../lib";
+import { orgInfo, yen, md, num, today, thisMonth, inDate } from "../lib";
 import { addRow, removeRow } from "../useData";
 import { TwoStep, errMsg } from "../ui";
 
 export default function Sales({ data, toast }) {
   const { sales } = data;
+  const { shops: SHOPS } = orgInfo(data.org);
   const [f, setF] = useState({ date: today(), store: SHOPS[0], amount: "", memo: "" });
   const [mo, setMo] = useState(thisMonth());
   const [busy, setBusy] = useState(false);
