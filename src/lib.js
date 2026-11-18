@@ -1,4 +1,13 @@
-export const STORES = ["本部", "BERO BERO BAR", "BAR MASH", "Lounge Bee"];
+// 会社(組織)ごとの設定。bees は従来どおり(データはルート直下)、他社は orgs/{id}/ 配下に分けて保存する
+export const ORGS = {
+  bees: { name: "Bee's", stores: ["本部", "BERO BERO BAR", "BAR MASH", "Lounge Bee"] },
+  bamboo: { name: "Bamboo (BAR CODE)", stores: ["本部", "BAR CODE"] },
+};
+export const orgInfo = (org) => {
+  const o = ORGS[org] || ORGS.bees;
+  return { name: o.name, stores: o.stores, shops: o.stores.slice(1) };
+};
+export const STORES = ORGS.bees.stores;
 export const SHOPS = STORES.slice(1);
 export const CATS = [
   { k: "売上金", dir: "in" }, { k: "両替金", dir: "out" }, { k: "銀行入金", dir: "out" }, { k: "銀行出金", dir: "in" },
@@ -35,8 +44,8 @@ export function withRunning(txns, sales, opening) {
 
 export const lastBal = (run, opening) => (run.length ? run[run.length - 1].bal : num(opening));
 
-export function changeLoans(txns) {
-  const m = Object.fromEntries(SHOPS.map((s) => [s, 0]));
+export function changeLoans(txns, shops = SHOPS) {
+  const m = Object.fromEntries(shops.map((s) => [s, 0]));
   txns.filter((t) => t.cat === "両替金" && t.store !== "本部")
     .forEach((t) => { m[t.store] = (m[t.store] || 0) + (t.dir === "out" ? num(t.amount) : -num(t.amount)); });
   return m;

@@ -1,13 +1,14 @@
 import { useMemo, useState } from "react";
-import { STORES, CATS, catClass, yen, md, today, thisMonth, withRunning, lastBal } from "../lib";
+import { orgInfo, CATS, catClass, yen, md, today, thisMonth, withRunning, lastBal } from "../lib";
 import { addRow, updateRow, removeRow } from "../useData";
 import { TwoStep, errMsg } from "../ui";
 
-const blankForm = () => ({ date: today(), cat: CATS[0].k, store: STORES[0], dir: CATS[0].dir, amount: "", memo: "" });
+const blankForm = (STORES) => ({ date: today(), cat: CATS[0].k, store: STORES[0], dir: CATS[0].dir, amount: "", memo: "" });
 
 export default function Ledger({ data, toast }) {
   const { txns, sales, settings } = data;
-  const [f, setF] = useState(blankForm);
+  const { stores: STORES } = orgInfo(data.org);
+  const [f, setF] = useState(() => blankForm(STORES));
   const [editId, setEditId] = useState(null);
   const [busy, setBusy] = useState(false);
   const [mo, setMo] = useState(thisMonth());
@@ -29,7 +30,7 @@ export default function Ledger({ data, toast }) {
     setF({ date: t.date || today(), cat: t.cat, store: t.store || STORES[0], dir: t.dir, amount: String(t.amount ?? ""), memo: t.memo || "" });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  const cancelEdit = () => { setEditId(null); setF(blankForm()); };
+  const cancelEdit = () => { setEditId(null); setF(blankForm(STORES)); };
 
   const submit = async () => {
     if (!amt || amt <= 0) { toast("金額を入力してください"); return; }
