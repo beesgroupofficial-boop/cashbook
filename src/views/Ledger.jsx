@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
-import { orgInfo, CATS, catClass, yen, md, today, thisMonth, withRunning, lastBal } from "../lib";
+import { orgInfo, catClass, yen, md, today, thisMonth, withRunning, lastBal } from "../lib";
 import { addRow, updateRow, removeRow } from "../useData";
 import { TwoStep, errMsg } from "../ui";
 
-const blankForm = (STORES) => ({ date: today(), cat: CATS[0].k, store: STORES[0], dir: CATS[0].dir, amount: "", memo: "" });
+const blankForm = (STORES, CATS) => ({ date: today(), cat: CATS[0].k, store: STORES[0], dir: CATS[0].dir, amount: "", memo: "" });
 
 export default function Ledger({ data, toast }) {
   const { txns, sales, settings } = data;
-  const { stores: STORES } = orgInfo(data.org);
-  const [f, setF] = useState(() => blankForm(STORES));
+  const { stores: STORES, cats: CATS } = orgInfo(data.org);
+  const [f, setF] = useState(() => blankForm(STORES, CATS));
   const [editId, setEditId] = useState(null);
   const [busy, setBusy] = useState(false);
   const [mo, setMo] = useState(thisMonth());
@@ -30,7 +30,7 @@ export default function Ledger({ data, toast }) {
     setF({ date: t.date || today(), cat: t.cat, store: t.store || STORES[0], dir: t.dir, amount: String(t.amount ?? ""), memo: t.memo || "" });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  const cancelEdit = () => { setEditId(null); setF(blankForm(STORES)); };
+  const cancelEdit = () => { setEditId(null); setF(blankForm(STORES, CATS)); };
 
   const submit = async () => {
     if (!amt || amt <= 0) { toast("金額を入力してください"); return; }
@@ -104,7 +104,7 @@ export default function Ledger({ data, toast }) {
         <tbody>
           {rows.length ? rows.map((t) => (
             <tr key={t.id} style={t.id === editId ? { background: "var(--sunk)" } : undefined}>
-              <td className="num">{md(t.date)}</td><td><span className={"tag " + catClass(t.cat)}>{t.cat}</span></td><td>{t.store}</td>
+              <td className="num">{md(t.date)}</td><td><span className={"tag " + catClass(t.cat, CATS)}>{t.cat}</span></td><td>{t.store}</td>
               <td className="r num out-t">{t.dir === "out" ? yen(t.amount) : ""}</td>
               <td className="r num in-t">{t.dir === "in" ? yen(t.amount) : ""}</td>
               <td className="r num">{yen(t.bal)}</td>

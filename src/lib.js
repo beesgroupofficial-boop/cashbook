@@ -1,11 +1,19 @@
 // 会社(組織)ごとの設定。bees は従来どおり(データはルート直下)、他社は orgs/{id}/ 配下に分けて保存する
 export const ORGS = {
   bees: { name: "Bee's", stores: ["本部", "BERO BERO BAR", "BAR MASH", "Lounge Bee"] },
-  bamboo: { name: "Bamboo (BAR CODE)", stores: ["本部", "BAR CODE"] },
+  bamboo: {
+    name: "Bamboo (BAR CODE)", stores: ["本部", "BAR CODE"],
+    // 従来のスプレッドシートの仕分けに合わせる（先頭が入力フォームの初期値）
+    cats: [
+      { k: "売上金", dir: "in" }, { k: "経費", dir: "in" }, { k: "立替金", dir: "out" }, { k: "社員給料", dir: "out" },
+      { k: "支払い", dir: "out" }, { k: "銀行入金", dir: "out" }, { k: "銀行出金", dir: "in" }, { k: "両替金", dir: "out" },
+      { k: "現金過不足", dir: "in" }, { k: "その他", dir: "out" },
+    ],
+  },
 };
 export const orgInfo = (org) => {
   const o = ORGS[org] || ORGS.bees;
-  return { name: o.name, stores: o.stores, shops: o.stores.slice(1) };
+  return { name: o.name, stores: o.stores, shops: o.stores.slice(1), cats: o.cats || CATS };
 };
 export const STORES = ORGS.bees.stores;
 export const SHOPS = STORES.slice(1);
@@ -15,7 +23,7 @@ export const CATS = [
   { k: "立替金", dir: "out" }, { k: "現金過不足", dir: "in" }, { k: "その他", dir: "out" },
 ];
 // 区分ごとの色（styles.css の .cat-番号 と対応。「その他」は色なし）
-export const catClass = (cat) => { const i = CATS.findIndex((c) => c.k === cat); return i >= 0 && i < 9 ? `cat-${i}` : ""; };
+export const catClass = (cat, cats = CATS) => { const i = cats.findIndex((c) => c.k === cat); return i >= 0 && i < 9 ? `cat-${i}` : ""; };
 export const DENOMS = [10000, 5000, 2000, 1000, 500, 100, 50, 10, 5, 1];
 
 export const num = (v) => Number(v) || 0;
