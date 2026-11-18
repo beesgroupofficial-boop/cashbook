@@ -1,19 +1,27 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // members/{uid} にドキュメントがある人だけが使える
+    // members/{uid} にドキュメントがある人だけが使える。
+    // members/{uid}.orgs（例: ["bees","bamboo"]）で使える会社を決める。orgs が無い人は従来どおり bees のみ。
     function isMember() {
       return request.auth != null
         && exists(/databases/$(database)/documents/members/$(request.auth.uid));
+    }
+    function inOrg(org) {
+      return isMember()
+        && (org in get(/databases/$(database)/documents/members/$(request.auth.uid)).data.get('orgs', ['bees']));
     }
     // 自分が登録済みかどうかだけ確認できる（追加・変更はコンソールから）
     match /members/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false;
     }
-    match /txns/{id}     { allow read, write: if isMember(); }
-    match /counts/{id}   { allow read, write: if isMember(); }
-    match /sales/{id}    { allow read, write: if isMember(); }
-    match /settings/{id} { allow read, write: if isMember(); }
+    // bees（従来のデータ。ルート直下）
+    match /txns/{id}     { allow read, write: if inOrg('bees'); }
+    match /counts/{id}   { allow read, write: if inOrg('bees'); }
+    match /sales/{id}    { allow read, write: if inOrg('bees'); }
+    match /settings/{id} { allow read, write: if inOrg('bees'); }
+    // それ以外の会社（例: bamboo）は orgs/{org}/ 配下に分けて保存
+    match /orgs/{org}/{col}/{id} { allow read, write: if inOrg(org); }
   }
 }
