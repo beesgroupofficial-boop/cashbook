@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { orgInfo, catClass, yen, md, today, thisMonth, withRunning, lastBal } from "../lib";
+import { orgInfo, catClass, num, signed, yen, md, today, thisMonth, withRunning, lastBal } from "../lib";
 import { addRow, updateRow, removeRow } from "../useData";
 import { TwoStep, errMsg } from "../ui";
 
@@ -13,12 +13,23 @@ export default function Ledger({ data, toast }) {
   const [busy, setBusy] = useState(false);
   const [mo, setMo] = useState(thisMonth());
   const [filter, setFilter] = useState("");
+  const [sel, setSel] = useState(() => new Set());   // 合計を出すために選んだ行
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
 
   const run = useMemo(() => withRunning(txns, sales, settings.opening), [txns, sales, settings.opening]);
   const bal = lastBal(run, settings.opening);
   const rows = run.filter((t) => !t.sale && (!mo || (t.date || "").startsWith(mo)) && (!filter || t.cat === filter)).reverse();
   const amt = parseInt(f.amount) || 0;
+
+  // 選んだ行の合計（入金・出金・差し引き と 店舗ごとの差し引き）
+  const picked = run.filter((t) => !t.sale && sel.has(t.id));
+  const pin = picked.filter((t) => t.dir === "in").reduce((a, t) => a + num(t.amount), 0);
+  const pout = picked.filter((t) => t.dir === "out").reduce((a, t) => a + num(t.amount), 0);
+  const byStore = {};
+  picked.forEach((t) => { const k = t.store || "—"; byStore[k] = (byStore[k] || 0) + (t.dir === "in" ? num(t.amount) : -num(t.amount)); });
+  const toggle = (id) => setSel((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const allOn = rows.length > 0 && rows.every((t) => sel.has(t.id));
+  const toggleAll = () => setSel((s) => { const n = new Set(s); rows.forEach((t) => (allOn ? n.delete(t.id) : n.add(t.id))); return n; });
 
   // 編集中は元の金額の影響を差し引いてから新しい金額を足す
   const editing = editId ? txns.find((t) => t.id === editId) : null;
@@ -100,10 +111,12 @@ export default function Ledger({ data, toast }) {
         </div>
       </div>
       <div className="tbl-wrap"><table>
-        <thead><tr><th>日付</th><th>区分</th><th>店舗</th><th className="r">出金</th><th className="r">入金</th><th className="r">現金在高</th><th>メモ</th><th></th></tr></thead>
+        <thead><tr><th style={{ width: 28 }}><input type="checkbox" aria-label="表示中をすべて選択" checked={allOn} onChange={toggleAll} /></th><th>日付</th><th>区分</th><th>店舗</th><th className="r">出金</th><th className="r">入金</th><th className="r">現金在高</th><th>メモ</th><th></th></tr></thead>
         <tbody>
           {rows.length ? rows.map((t) => (
-            <tr key={t.id} style={t.id === editId ? { background: "var(--sunk)" } : undefined}>
+            <tr key={t.id} style={t.id === editId ? { background: "var(--sunk)" } : sel.has(t.id) ? { background: "#FFF6D6", color: "#222" } : undefined}
+              onClick={(e) => { if (!e.target.closest("button, a, input, select")) toggle(t.id); }}>
+              <td><input type="checkbox" aria-label="合計に入れる" checked={sel.has(t.id)} onChange={() => toggle(t.id)} /></td>
               <td className="num">{md(t.date)}</td><td><span className={"tag " + catClass(t.cat, CATS)}>{t.cat}</span></td><td>{t.store}</td>
               <td className="r num out-t">{t.dir === "out" ? yen(t.amount) : ""}</td>
               <td className="r num in-t">{t.dir === "in" ? yen(t.amount) : ""}</td>
@@ -114,9 +127,26 @@ export default function Ledger({ data, toast }) {
                 <TwoStep aria-label="この記録を削除" onConfirm={() => removeRow("txns", t.id).then(() => { if (t.id === editId) cancelEdit(); }).catch((e) => toast(errMsg(e)))} />
               </td>
             </tr>
-          )) : <tr><td colSpan="8" className="empty">この月の記録はまだありません。上のフォームから最初の入出金を記録してください。</td></tr>}
+          )) : <tr><td colSpan="9" className="empty">この月の記録はまだありません。上のフォームから最初の入出金を記録してください。</td></tr>}
         </tbody>
       </table></div>
+      {picked.length > 0 && (
+        <div className="selbar" role="status" aria-label="選択した記録の合計">
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+            <strong>{picked.length}件を選択</strong>
+            <button className="small" onClick={() => setSel(new Set())}>選択を解除</button>
+          </div>
+          <div className="num selsum">
+            <span>入金 <b className="in-t">{yen(pin)}</b></span>
+            <span>出金 <b className="out-t">{yen(pout)}</b></span>
+            <span>差し引き <b>{signed(pin - pout)}</b></span>
+          </div>
+          {Object.keys(byStore).length > 1 && (
+            <div className="num selstore">{Object.entries(byStore).map(([k, v]) => <span key={k}>{k} <b>{signed(v)}</b></span>)}</div>
+          )}
+        </div>
+      )}
+      {picked.length > 0 && <div style={{ height: 130 }} />}
     </section>
   );
 }
