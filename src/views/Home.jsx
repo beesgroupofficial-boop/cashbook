@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { SHOPS, yen, signed, num, thisMonth, fmtAt, allMoves, withRunning, lastBal } from "../lib";
+import { orgInfo, yen, signed, num, thisMonth, fmtAt, allMoves, withRunning, lastBal } from "../lib";
 import { saveSettings } from "../useData";
 import { Seal, errMsg } from "../ui";
 
 export default function Home({ data, toast }) {
   const { txns, sales, counts, settings } = data;
+  const { shops: SHOPS } = orgInfo(data.org);
   const [mo, setMo] = useState(thisMonth());
   const [opening, setOpening] = useState("");
   useEffect(() => setOpening(String(settings.opening ?? 0)), [settings.opening]);
