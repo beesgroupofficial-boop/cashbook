@@ -7,10 +7,9 @@ import Login from "./views/Login.jsx";
 import Home from "./views/Home.jsx";
 import Ledger from "./views/Ledger.jsx";
 import Count from "./views/Count.jsx";
-import Sales from "./views/Sales.jsx";
 import { ORGS, orgInfo } from "./lib";
 
-const TABS = [["home", "ホーム"], ["ledger", "入出金"], ["count", "金庫チェック"], ["sales", "売上"]];
+const TABS = [["home", "ホーム"], ["ledger", "入出金"], ["count", "金庫チェック"]];
 
 export default function App() {
   const [user, setUser] = useState(undefined);      // undefined = 確認中
@@ -64,7 +63,6 @@ export default function App() {
         {view === "home" && <Home key={org} {...props} />}
         {view === "ledger" && <Ledger key={org} {...props} />}
         {view === "count" && <Count key={org} {...props} />}
-        {view === "sales" && <Sales key={org} {...props} />}
       </div>
       <nav className="tabs" aria-label="画面切り替え"><div className="inner">
         {TABS.map(([k, l]) => (
