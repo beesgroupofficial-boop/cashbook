@@ -15,7 +15,7 @@ export function useData(enabled, org = "bees") {
     setState({ org, txns: [], counts: [], sales: [], settings: { opening: 0 }, error: null });
     if (!enabled) return;
     const onErr = (e) => setState((s) => ({ ...s, error: e.code || "error" }));
-    const subs = ["txns", "counts", "sales"].map((col) =>
+    const subs = ["txns", "counts"].map((col) =>
       onSnapshot(colRef(col, org), (snap) =>
         setState((s) => ({ ...s, [col]: snap.docs.map((d) => ({ ...d.data(), id: d.id })) })), onErr));
     subs.push(onSnapshot(docRef("settings", "main", org), (snap) =>
