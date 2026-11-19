@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { orgInfo, yen, signed, num, thisMonth, fmtAt, allMoves, withRunning, lastBal } from "../lib";
+import { yen, signed, num, thisMonth, fmtAt, allMoves, withRunning, lastBal } from "../lib";
 import { saveSettings } from "../useData";
 import { Seal, errMsg } from "../ui";
 
 export default function Home({ data, toast }) {
   const { txns, sales, counts, settings } = data;
-  const { shops: SHOPS } = orgInfo(data.org);
   const [mo, setMo] = useState(thisMonth());
   const [opening, setOpening] = useState("");
   useEffect(() => setOpening(String(settings.opening ?? 0)), [settings.opening]);
@@ -24,7 +23,6 @@ export default function Home({ data, toast }) {
   const openB = lastBal(before, settings.opening), closeB = lastBal(upto, settings.opening);
   const byCat = {};
   tx.forEach((t) => { byCat[t.cat] = (byCat[t.cat] || 0) + (t.dir === "in" ? num(t.amount) : -num(t.amount)); });
-  const shop = SHOPS.map((s) => sales.filter((r) => r.store === s && (r.date || "").startsWith(mo)).reduce((a, r) => a + num(r.amount), 0));
 
   return (
     <section>
@@ -69,11 +67,6 @@ export default function Home({ data, toast }) {
             : <Row k="区分ごとの内訳" v="記録なし" />}
         </dl></div>
       </div>
-      <div className="panel" style={{ marginTop: 12 }}><dl className="kv num">
-        <dt style={{ gridColumn: "1/-1", color: "var(--ink)", fontWeight: 700 }}>店舗別の売上</dt>
-        {SHOPS.map((s, i) => <Row key={s} k={s} v={yen(shop[i])} cls="in-t" />)}
-        <Row k={<strong>合計</strong>} v={<strong>{yen(shop.reduce((a, b) => a + b, 0))}</strong>} />
-      </dl></div>
 
       <h2>設定</h2>
       <div className="panel">
