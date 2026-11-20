@@ -86,8 +86,7 @@ export default function Count({ data, toast }) {
         </div>
         <div className="hint" style={{ margin: "0 0 8px", lineHeight: 1.7 }}>
           <div>金庫に入れたお金がここに無いときは、先に「入出金」で記録してから数えてください。</div>
-          <div>帳簿上の現金在高: <b className="out-t num" style={{ fontSize: 16 }}>{yen(book)}</b></div>
-          <div>行をクリックすると、選んだ入金の合計が出ます。</div>
+          <div>帳簿上の現金在高: <b className="out-t num" style={{ fontSize: 16 }}>{yen(book)}</b>　行をクリックすると、選んだ入金の合計が出ます。</div>
         </div>
         {recentIn.length ? (
           <div className="tbl-wrap"><table>
