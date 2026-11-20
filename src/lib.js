@@ -81,6 +81,11 @@ export function matchSubsets(items, target, maxSize = 3, keep = 2, tol = 100) {
   rec(0, [], 0);
   found.sort((a, b) => Math.abs(a.err) - Math.abs(b.err) || a.length - b.length);
   // ぴったり一致があれば、それだけを出す（ずれのある候補は、ぴったりが無いときだけ）
-  return (found.length && found[0].err === 0 ? found.filter((g) => g.err === 0) : found).slice(0, keep);
+  if (!found.length) return [];
+  if (found[0].err !== 0) return found.slice(0, 1);   // ずれのある候補は一番近い1つだけ
+  const exact = found.filter((g) => g.err === 0).sort((a, b) => a.length - b.length);
+  const kept = [];
+  exact.forEach((g) => { if (!kept.some((h) => h.every((x) => g.includes(x)))) kept.push(g); });  // 小さい組み合わせを含むだけの候補は省く
+  return kept.slice(0, keep);
 }
 export const signedAmt = (t) => (t.dir === "in" ? 1 : -1) * (Number(t.amount) || 0);
