@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { DENOMS, yen, signed, fmtAt, today, withRunning, lastBal, bookAt, num } from "../lib";
+import { DENOMS, yen, signed, fmtAt, today, md, localDate, withRunning, lastBal, bookAt, num } from "../lib";
 import { addRow, removeRow } from "../useData";
 import { Seal, TwoStep, errMsg } from "../ui";
 
@@ -28,6 +28,12 @@ export default function Count({ data, toast }) {
     return { ...h, book: b, diff: num(h.actual) - b };
   }), [counts, txns, sales, settings.opening]);
 
+  // 数える前の確認用: 直近3日間の入金（記録済み）を新しい順に表示
+  const since = localDate(Date.now() - 2 * 86400000);
+  const recentIn = useMemo(() => txns.filter((t) => t.dir === "in" && (t.date || "") >= since)
+    .sort((x, y) => (x.date === y.date ? (y.createdAt || 0) - (x.createdAt || 0) : x.date < y.date ? 1 : -1)), [txns, since]);
+  const recentInSum = recentIn.reduce((a, t) => a + num(t.amount), 0);
+
   const reset = () => { setC(blank()); setBox(blankBox()); setPetty(""); };
 
   const save = async () => {
@@ -51,6 +57,23 @@ export default function Count({ data, toast }) {
 
   return (
     <section>
+      <div className="panel" style={{ marginBottom: 12 }}>
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+          <strong>直近の入金（記録済み）</strong>
+          <span className="hint num">{recentIn.length ? `${recentIn.length}件 合計 ${yen(recentInSum)}` : ""}</span>
+        </div>
+        <p className="hint" style={{ margin: "0 0 8px" }}>金庫に入れたお金がここに無いときは、先に「入出金」で記録してから数えてください。（帳簿上の現金在高: {yen(book)}）</p>
+        {recentIn.length ? (
+          <div className="tbl-wrap"><table>
+            <thead><tr><th>日付</th><th>区分</th><th>店舗</th><th className="r">入金</th><th>メモ</th><th>記録した時刻</th></tr></thead>
+            <tbody>{recentIn.slice(0, 15).map((t) => (
+              <tr key={t.id}><td className="num">{md(t.date)}</td><td>{t.cat}</td><td>{t.store}</td>
+                <td className="r num in-t">{yen(t.amount)}</td><td className="memo">{t.memo}</td><td className="num">{fmtAt(t.createdAt)}</td></tr>
+            ))}</tbody>
+          </table></div>
+        ) : <p className="hint" style={{ margin: 0 }}>この3日間の入金の記録はまだありません。</p>}
+        {recentIn.length > 15 && <p className="hint" style={{ margin: "6px 0 0" }}>ほかに {recentIn.length - 15} 件あります（入出金の画面で確認できます）</p>}
+      </div>
       <div className="panel">
         <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <strong>金種ごとの枚数を入力</strong>
