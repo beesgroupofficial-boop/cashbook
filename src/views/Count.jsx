@@ -40,6 +40,9 @@ export default function Count({ data, toast }) {
     .sort((x, y) => (y.createdAt || 0) - (x.createdAt || 0)).map((t) => ({ t, s: signedAmt(t) })), [txns, since]);
   const liveHints = any && diff !== 0 ? matchSubsets(recentAll, -diff) : [];
   const [open, setOpen] = useState(null);
+  const beforeOf = (h) => txns.filter((t) => (t.createdAt || 0) <= h.at && (t.date || "") >= localDate(h.at - 2 * 86400000))
+    .sort((x, y) => (y.createdAt || 0) - (x.createdAt || 0));
+  const errNote = (g) => (g.err ? `（金額は ${yen(Math.abs(g.err))} ${g.err > 0 ? "多い" : "少ない"}）` : "（金額がぴったり一致）");
   const lateOf = (h) => txns.filter((t) => (t.createdAt || 0) > h.at && (t.date || "") <= localDate(h.at))
     .sort((x, y) => (x.createdAt || 0) - (y.createdAt || 0));
 
@@ -134,6 +137,7 @@ export default function Count({ data, toast }) {
             <strong>差異 {signed(diff)} の原因かもしれない記録</strong>
             {liveHints.map((g, i) => (
               <div key={i} style={{ marginTop: 4 }}>
+                <span className="hint">{errNote(g)}</span>
                 {g.map((x) => <span key={x.t.id} style={{ display: "block" }}>・{md(x.t.date)} {x.t.cat} {x.t.store} {x.t.dir === "in" ? "入金" : "出金"} {yen(x.t.amount)}{x.t.memo ? `（${x.t.memo}）` : ""}</span>)}
               </div>
             ))}
@@ -157,6 +161,7 @@ export default function Count({ data, toast }) {
             const isOpen = open === h.id;
             const late = isOpen ? lateOf(h) : [];
             const hints = isOpen && h.diff !== 0 ? matchSubsets(late.map((t) => ({ t, s: signedAmt(t) })), h.diff) : [];
+            const bHints = isOpen && h.diff !== 0 && !hints.length ? matchSubsets(beforeOf(h).map((t) => ({ t, s: signedAmt(t) })), -h.diff) : [];
             const cnt = h.counts || {}, bx = h.boxes || {};
             return (
             <Fragment key={h.id}>
@@ -199,10 +204,23 @@ export default function Count({ data, toast }) {
                       <strong>差異 {signed(h.diff)} は、このチェックのあとに記録された次の記録と一致します</strong>
                       {hints.map((g, i) => (
                         <div key={i} style={{ marginTop: 4 }}>
+                          <span className="hint">{errNote(g)}</span>
                           {g.map((x) => <span key={x.t.id} style={{ display: "block" }}>・{md(x.t.date)} {x.t.cat} {x.t.store} {x.t.dir === "in" ? "入金" : "出金"} {yen(x.t.amount)}{x.t.memo ? `（${x.t.memo}）` : ""}　記録 {fmtAt(x.t.createdAt)}</span>)}
                         </div>
                       ))}
                       <span className="hint" style={{ display: "block", marginTop: 4 }}>数えた時点ではすでに金庫にあったお金を、数えたあとに記録した可能性が高いです。</span>
+                    </div>
+                  )}
+                  {bHints.length > 0 && (
+                    <div className="hintbox" role="note">
+                      <strong>差異 {signed(h.diff)} は、このチェックの前に記録された次の記録と一致します</strong>
+                      {bHints.map((g, i) => (
+                        <div key={i} style={{ marginTop: 4 }}>
+                          <span className="hint">{errNote(g)}</span>
+                          {g.map((x) => <span key={x.t.id} style={{ display: "block" }}>・{md(x.t.date)} {x.t.cat} {x.t.store} {x.t.dir === "in" ? "入金" : "出金"} {yen(x.t.amount)}{x.t.memo ? `（${x.t.memo}）` : ""}　記録 {fmtAt(x.t.createdAt)}</span>)}
+                        </div>
+                      ))}
+                      <span className="hint" style={{ display: "block", marginTop: 4 }}>記録はしたが、数えた金庫には入っていなかった（入金を入れずに数えた／出金したのに金庫に残っていた）可能性があります。</span>
                     </div>
                   )}
                   {late.length > 0 && (
