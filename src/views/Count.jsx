@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { DENOMS, yen, signed, fmtAt, today, md, localDate, withRunning, lastBal, bookAt, num } from "../lib";
+import { Fragment, useMemo, useState } from "react";
+import { DENOMS, yen, signed, fmtAt, today, md, localDate, withRunning, lastBal, bookAt, num, matchSubsets, signedAmt } from "../lib";
 import { addRow, removeRow } from "../useData";
 import { Seal, TwoStep, errMsg } from "../ui";
 
@@ -33,6 +33,15 @@ export default function Count({ data, toast }) {
   const recentIn = useMemo(() => txns.filter((t) => t.dir === "in" && (t.date || "") >= since)
     .sort((x, y) => (x.date === y.date ? (y.createdAt || 0) - (x.createdAt || 0) : x.date < y.date ? 1 : -1)), [txns, since]);
   const recentInSum = recentIn.reduce((a, t) => a + num(t.amount), 0);
+
+  // 差異の原因候補（現在の入力）: 直近3日の記録のうち、差異と逆の合計になる組み合わせ
+  // （記録したのに金庫へ入れていない／出金したのに金庫に残っている）
+  const recentAll = useMemo(() => txns.filter((t) => (t.date || "") >= since)
+    .sort((x, y) => (y.createdAt || 0) - (x.createdAt || 0)).map((t) => ({ t, s: signedAmt(t) })), [txns, since]);
+  const liveHints = any && diff !== 0 ? matchSubsets(recentAll, -diff) : [];
+  const [open, setOpen] = useState(null);
+  const lateOf = (h) => txns.filter((t) => (t.createdAt || 0) > h.at && (t.date || "") <= localDate(h.at))
+    .sort((x, y) => (x.createdAt || 0) - (y.createdAt || 0));
 
   const reset = () => { setC(blank()); setBox(blankBox()); setPetty(""); };
 
@@ -120,6 +129,17 @@ export default function Count({ data, toast }) {
           </dl>
           <Seal empty={!any} diff={diff} pop={pop} />
         </div>
+        {liveHints.length > 0 && (
+          <div className="hintbox" role="note">
+            <strong>差異 {signed(diff)} の原因かもしれない記録</strong>
+            {liveHints.map((g, i) => (
+              <div key={i} style={{ marginTop: 4 }}>
+                {g.map((x) => <span key={x.t.id} style={{ display: "block" }}>・{md(x.t.date)} {x.t.cat} {x.t.store} {x.t.dir === "in" ? "入金" : "出金"} {yen(x.t.amount)}{x.t.memo ? `（${x.t.memo}）` : ""}</span>)}
+              </div>
+            ))}
+            <span className="hint" style={{ display: "block", marginTop: 4 }}>記録はしたが、実際の金庫に反映されていない（入金したお金を入れていない／出金したのに金庫に残っている）可能性があります。</span>
+          </div>
+        )}
         <label className="f" style={{ marginTop: 12 }}>メモ（差異の理由など）
           <input placeholder="例：BAR MASH 両替金 未返却分" value={note} onChange={(e) => setNote(e.target.value)} /></label>
         <div className="row" style={{ marginTop: 12, justifyContent: "flex-end" }}>
@@ -133,14 +153,70 @@ export default function Count({ data, toast }) {
       <div className="tbl-wrap"><table>
         <thead><tr><th>日時</th><th className="r">実際</th><th className="r">帳簿</th><th className="r">差異</th><th>メモ</th><th></th></tr></thead>
         <tbody>
-          {hist.length ? hist.map((h) => (
-            <tr key={h.id}>
-              <td className="num">{fmtAt(h.at)}</td><td className="r num">{yen(h.actual)}</td><td className="r num">{yen(h.book)}</td>
+          {hist.length ? hist.map((h) => {
+            const isOpen = open === h.id;
+            const late = isOpen ? lateOf(h) : [];
+            const hints = isOpen && h.diff !== 0 ? matchSubsets(late.map((t) => ({ t, s: signedAmt(t) })), h.diff) : [];
+            const cnt = h.counts || {}, bx = h.boxes || {};
+            return (
+            <Fragment key={h.id}>
+            <tr style={{ cursor: "pointer", background: isOpen ? "var(--sunk)" : undefined }}
+              onClick={(e) => { if (!e.target.closest("button")) setOpen(isOpen ? null : h.id); }} aria-expanded={isOpen}>
+              <td className="num">{isOpen ? "▾ " : "▸ "}{fmtAt(h.at)}</td><td className="r num">{yen(h.actual)}</td><td className="r num">{yen(h.book)}</td>
               <td className={"r num " + (h.diff === 0 ? "" : h.diff > 0 ? "in-t" : "out-t")}>{h.diff === 0 ? "一致" : signed(h.diff)}</td>
               <td className="memo">{h.note}</td>
               <td><TwoStep aria-label="このチェックを削除" onConfirm={() => removeRow("counts", h.id).catch((e) => toast(errMsg(e)))} /></td>
             </tr>
-          )) : <tr><td colSpan="6" className="empty">まだチェックしていません。金庫の中身を数えて保存すると、ここに残ります。</td></tr>}
+            {isOpen && (
+              <tr><td colSpan="6" style={{ whiteSpace: "normal", background: "var(--sunk)" }}>
+                <div className="detail">
+                  <div className="detail-grid num">
+                    <div>
+                      <strong>金種ごとの枚数</strong>
+                      <dl className="kv">
+                        {DENOMS.filter((d) => num(cnt[d])).map((d) => <Fragment key={d}><dt>{d.toLocaleString()}円 × {num(cnt[d])}枚</dt><dd>{yen(d * num(cnt[d]))}</dd></Fragment>)}
+                        {!DENOMS.some((d) => num(cnt[d])) && <><dt>枚数の入力なし</dt><dd></dd></>}
+                        <dt>金種の合計</dt><dd>{yen(DENOMS.reduce((a, d) => a + d * num(cnt[d]), 0))}</dd>
+                      </dl>
+                    </div>
+                    <div>
+                      <strong>小銭BOX・小口</strong>
+                      <dl className="kv">
+                        {Object.keys(bx).filter((b) => num(bx[b])).map((b) => <Fragment key={b}><dt>小銭BOX {Number(b).toLocaleString()}円 × {num(bx[b])}個</dt><dd>{yen(Number(b) * num(bx[b]))}</dd></Fragment>)}
+                        <dt>小口</dt><dd>{yen(h.petty)}</dd>
+                      </dl>
+                      <strong style={{ display: "block", marginTop: 10 }}>結果</strong>
+                      <dl className="kv">
+                        <dt>実際の金庫</dt><dd>{yen(h.actual)}</dd>
+                        <dt>帳簿上（このチェックの時点）</dt><dd>{yen(h.book)}</dd>
+                        <dt>差異</dt><dd className={h.diff === 0 ? "" : h.diff > 0 ? "in-t" : "out-t"}>{h.diff === 0 ? "一致" : signed(h.diff)}</dd>
+                      </dl>
+                    </div>
+                  </div>
+                  <p className="hint" style={{ margin: "8px 0 0" }}>{fmtAt(h.at)} に記録{h.by ? `（${h.by}）` : ""}{h.note ? `　メモ：${h.note}` : ""}</p>
+                  {hints.length > 0 && (
+                    <div className="hintbox" role="note">
+                      <strong>差異 {signed(h.diff)} は、このチェックのあとに記録された次の記録と一致します</strong>
+                      {hints.map((g, i) => (
+                        <div key={i} style={{ marginTop: 4 }}>
+                          {g.map((x) => <span key={x.t.id} style={{ display: "block" }}>・{md(x.t.date)} {x.t.cat} {x.t.store} {x.t.dir === "in" ? "入金" : "出金"} {yen(x.t.amount)}{x.t.memo ? `（${x.t.memo}）` : ""}　記録 {fmtAt(x.t.createdAt)}</span>)}
+                        </div>
+                      ))}
+                      <span className="hint" style={{ display: "block", marginTop: 4 }}>数えた時点ではすでに金庫にあったお金を、数えたあとに記録した可能性が高いです。</span>
+                    </div>
+                  )}
+                  {late.length > 0 && (
+                    <div style={{ marginTop: 8 }}>
+                      <strong>このチェックのあとに記録された、この日までの記録</strong>
+                      {late.slice(0, 10).map((t) => <span key={t.id} className="num" style={{ display: "block" }}>・{md(t.date)} {t.cat} {t.store} {t.dir === "in" ? "入金" : "出金"} {yen(t.amount)}{t.memo ? `（${t.memo}）` : ""}　記録 {fmtAt(t.createdAt)}</span>)}
+                    </div>
+                  )}
+                </div>
+              </td></tr>
+            )}
+            </Fragment>
+            );
+          }) : <tr><td colSpan="6" className="empty">まだチェックしていません。金庫の中身を数えて保存すると、ここに残ります。</td></tr>}
         </tbody>
       </table></div>
     </section>
