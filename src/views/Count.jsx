@@ -33,6 +33,16 @@ export default function Count({ data, toast }) {
   const recentIn = useMemo(() => txns.filter((t) => t.dir === "in" && (t.date || "") >= since)
     .sort((x, y) => (x.date === y.date ? (y.createdAt || 0) - (x.createdAt || 0) : x.date < y.date ? 1 : -1)), [txns, since]);
   const recentInSum = recentIn.reduce((a, t) => a + num(t.amount), 0);
+  // クリックで選んだ入金の合計（店舗ごとの内訳つき）
+  const [selIn, setSelIn] = useState(() => new Set());
+  const shown = recentIn.slice(0, 15);
+  const pickedIn = recentIn.filter((t) => selIn.has(t.id));
+  const pickedSum = pickedIn.reduce((a, t) => a + num(t.amount), 0);
+  const pickedByStore = {};
+  pickedIn.forEach((t) => { const k = t.store || "—"; pickedByStore[k] = (pickedByStore[k] || 0) + num(t.amount); });
+  const toggleIn = (id) => setSelIn((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const allInOn = shown.length > 0 && shown.every((t) => selIn.has(t.id));
+  const toggleAllIn = () => setSelIn((s) => { const n = new Set(s); shown.forEach((t) => (allInOn ? n.delete(t.id) : n.add(t.id))); return n; });
 
   // 差異の原因候補（現在の入力）: 直近3日の記録のうち、差異と逆の合計になる組み合わせ
   // （記録したのに金庫へ入れていない／出金したのに金庫に残っている）
@@ -72,20 +82,34 @@ export default function Count({ data, toast }) {
       <div className="panel" style={{ marginBottom: 12 }}>
         <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
           <strong>直近の入金（記録済み）</strong>
-          <span className="hint num">{recentIn.length ? `${recentIn.length}件 合計 ${yen(recentInSum)}` : ""}</span>
+          <span className="hint num">{recentIn.length ? `合計 ${yen(recentInSum)}` : ""}</span>
         </div>
-        <p className="hint" style={{ margin: "0 0 8px" }}>金庫に入れたお金がここに無いときは、先に「入出金」で記録してから数えてください。（帳簿上の現金在高: {yen(book)}）</p>
+        <p className="hint" style={{ margin: "0 0 8px" }}>金庫に入れたお金がここに無いときは、先に「入出金」で記録してから数えてください。（帳簿上の現金在高: <b className="out-t num">{yen(book)}</b>）　行をクリックすると、選んだ入金の合計が出ます。</p>
         {recentIn.length ? (
           <div className="tbl-wrap"><table>
-            <thead><tr><th>日付</th><th>区分</th><th>店舗</th><th className="r">入金</th><th>メモ</th><th>記録した時刻</th></tr></thead>
-            <tbody>{recentIn.slice(0, 15).map((t) => (
-              <tr key={t.id}><td className="num">{md(t.date)}</td><td>{t.cat}</td><td>{t.store}</td>
+            <thead><tr><th style={{ width: 28 }}><input type="checkbox" aria-label="表示中をすべて選択" checked={allInOn} onChange={toggleAllIn} /></th><th>日付</th><th>区分</th><th>店舗</th><th className="r">入金</th><th>メモ</th><th>記録した時刻</th></tr></thead>
+            <tbody>{shown.map((t) => (
+              <tr key={t.id} style={selIn.has(t.id) ? { background: "#FFF6D6", color: "#222" } : undefined} onClick={(e) => { if (!e.target.closest("input, button")) toggleIn(t.id); }}>
+                <td><input type="checkbox" aria-label="合計に入れる" checked={selIn.has(t.id)} onChange={() => toggleIn(t.id)} /></td><td className="num">{md(t.date)}</td><td>{t.cat}</td><td>{t.store}</td>
                 <td className="r num in-t">{yen(t.amount)}</td><td className="memo">{t.memo}</td><td className="num">{fmtAt(t.createdAt)}</td></tr>
             ))}</tbody>
           </table></div>
         ) : <p className="hint" style={{ margin: 0 }}>この3日間の入金の記録はまだありません。</p>}
         {recentIn.length > 15 && <p className="hint" style={{ margin: "6px 0 0" }}>ほかに {recentIn.length - 15} 件あります（入出金の画面で確認できます）</p>}
       </div>
+      {pickedIn.length > 0 && (
+        <div className="selbar" role="status" aria-label="選んだ入金の合計">
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+            <strong>{pickedIn.length}件を選択</strong>
+            <button className="small" onClick={() => setSelIn(new Set())}>選択を解除</button>
+          </div>
+          <div className="num selsum"><span>入金合計 <b className="in-t">{yen(pickedSum)}</b></span></div>
+          {Object.keys(pickedByStore).length > 1 && (
+            <div className="num selstore">{Object.entries(pickedByStore).map(([k, v]) => <span key={k}>{k} <b>{yen(v)}</b></span>)}</div>
+          )}
+        </div>
+      )}
+      {pickedIn.length > 0 && <div style={{ height: 130 }} />}
       <div className="panel">
         <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <strong>金種ごとの枚数を入力</strong>
