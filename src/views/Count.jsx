@@ -84,7 +84,11 @@ export default function Count({ data, toast }) {
           <strong>直近の入金（記録済み）</strong>
           <span className="hint num">{recentIn.length ? `合計 ${yen(recentInSum)}` : ""}</span>
         </div>
-        <p className="hint" style={{ margin: "0 0 8px" }}>金庫に入れたお金がここに無いときは、先に「入出金」で記録してから数えてください。（帳簿上の現金在高: <b className="out-t num">{yen(book)}</b>）　行をクリックすると、選んだ入金の合計が出ます。</p>
+        <div className="hint" style={{ margin: "0 0 8px", lineHeight: 1.7 }}>
+          <div>金庫に入れたお金がここに無いときは、先に「入出金」で記録してから数えてください。</div>
+          <div>帳簿上の現金在高: <b className="out-t num" style={{ fontSize: 16 }}>{yen(book)}</b></div>
+          <div>行をクリックすると、選んだ入金の合計が出ます。</div>
+        </div>
         {recentIn.length ? (
           <div className="tbl-wrap"><table>
             <thead><tr><th style={{ width: 28 }}><input type="checkbox" aria-label="表示中をすべて選択" checked={allInOn} onChange={toggleAllIn} /></th><th>日付</th><th>区分</th><th>店舗</th><th className="r">入金</th><th>メモ</th><th>記録した時刻</th></tr></thead>
