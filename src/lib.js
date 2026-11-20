@@ -66,3 +66,18 @@ export function bookAt(txns, sales, opening, at) {
     .filter((t) => (t.createdAt || 0) <= at)
     .reduce((b, t) => b + (t.dir === "in" ? num(t.amount) : -num(t.amount)), num(opening));
 }
+
+// 差異と同じ金額になる記録の組み合わせ（最大3件まで）を探す。items: [{ t: 記録, s: 入金は+・出金は−の金額 }]
+export function matchSubsets(items, target, maxSize = 3, keep = 3) {
+  if (!target) return [];
+  const list = items.filter((x) => x.s).slice(0, 24), found = [];
+  const rec = (start, chosen, sum) => {
+    if (found.length >= 200) return;
+    if (chosen.length && sum === target) { found.push(chosen.slice()); return; }
+    if (chosen.length >= maxSize) return;
+    for (let i = start; i < list.length; i++) { chosen.push(list[i]); rec(i + 1, chosen, sum + list[i].s); chosen.pop(); }
+  };
+  rec(0, [], 0);
+  return found.sort((a, b) => a.length - b.length).slice(0, keep);
+}
+export const signedAmt = (t) => (t.dir === "in" ? 1 : -1) * (Number(t.amount) || 0);
